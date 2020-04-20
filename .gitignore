@@ -1,0 +1,5 @@
+*.idea
+*.exe
+.env
+.vscode
+.txt
