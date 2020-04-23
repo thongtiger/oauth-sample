@@ -7,29 +7,30 @@ import (
 
 	"github.com/thongtiger/oauth-rfc6749/auth"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-func (c *mongoContext) NewUser(username, password, role, displayName string, scope []string) (*auth.User, error) {
+func (c *mongoContext) NewUser(username, password, role string, scope []string) (*auth.User, error) {
 	client, err := c.newClient()
+	defer client.Disconnect(context.TODO())
+
 	if err != nil {
 		fmt.Println(err)
 		return nil, err
 	}
-	defer client.Disconnect(context.TODO())
-	collection := client.Database(c.database).Collection(CollectUsers)
-
 	insertData := auth.User{
+		ID: 			primitive.NewObjectID(),
 		Role:           role,
 		Scope:          scope,
 		Username:       username,
 		Password:       password,
-		Name:           displayName,
-		CreateTime:     time.Time{}.UTC(),
-		LatestLoggedin: time.Time{}.UTC(),
+		CreateTime:     time.Now().UTC(),
+		LatestLoggedin: time.Now().UTC(),
 	}
 
 	insertData.HashingPassword() // hashing
 
+	collection := client.Database(c.database).Collection(CollectUsers)
 	result, err := collection.InsertOne(context.TODO(), insertData)
 	if err != nil {
 		fmt.Println(ErrInsert)
@@ -41,13 +42,12 @@ func (c *mongoContext) NewUser(username, password, role, displayName string, sco
 	return &insertData, nil
 }
 func (c *mongoContext) ValidateUser(username, password string) (ok bool, result auth.User) {
-	ok = false
 	client, err := c.newClient()
+	defer client.Disconnect(context.TODO())
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
-	defer client.Disconnect(context.TODO())
 	collection := client.Database(c.database).Collection(CollectUsers)
 	// single find
 	filter := bson.M{"username": username}
@@ -58,6 +58,24 @@ func (c *mongoContext) ValidateUser(username, password string) (ok bool, result 
 	}
 	if result.VerifyPassword(password) {
 		ok = true
+		return
+	}
+	return
+}
+func (c *mongoContext) GetUser(username string) (result *auth.User, err error) {
+	client, err := c.newClient()
+	defer client.Disconnect(context.TODO())
+
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	// single find
+	filter := bson.M{"username": username}
+	ctx, _ := context.WithTimeout(context.Background(), 5*time.Second)
+
+	collection := client.Database(c.database).Collection(CollectUsers)
+	if err = collection.FindOne(ctx, filter).Decode(&result); err != nil {
 		return
 	}
 	return

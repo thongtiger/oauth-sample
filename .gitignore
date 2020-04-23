@@ -3,3 +3,4 @@
 .env*
 .vscode
 .txt
+/__debug_bin

@@ -50,8 +50,9 @@ var (
 
 // Store interface
 type Store interface {
-	NewUser(username, password, role, displayName string, scope []string) (*auth.User, error)
+	NewUser(username, password, role string, scope []string) (*auth.User, error)
 	ValidateUser(username, password string) (bool, auth.User)
+	GetUser(username string) (result *auth.User, err error)
 }
 
 // NewMongoStore : context
@@ -95,3 +96,4 @@ func (c *mongoContext) newClient() (*mongo.Client, error) {
 	fmt.Println("Connected to MongoDB!")
 	return client, nil
 }
+
