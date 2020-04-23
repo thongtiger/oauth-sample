@@ -1,5 +1,5 @@
 *.idea
 *.exe
-.env
+.env*
 .vscode
 .txt
