@@ -107,6 +107,8 @@ github.com/thongtiger/gostack v0.0.0-20200420022901-9bb9b97ff9d0 h1:MptTVZ+169+q
 github.com/thongtiger/gostack v0.0.0-20200420022901-9bb9b97ff9d0/go.mod h1:Ij7/3b+QnhZgltT/n6NeCj/Sm+0himhkHiNuO4HvQDE=
 github.com/thongtiger/oauth-rfc6749 v0.0.0-20200422074005-7949868687ab h1:wmUt5fcV9v93oydPDvStCJo/NspzfO+8HExG7P1S49w=
 github.com/thongtiger/oauth-rfc6749 v0.0.0-20200422074005-7949868687ab/go.mod h1:GwRwPkqk1RsrHNnsHJqUP8axSOOfJ1oPvgQMwA0V1W8=
+github.com/thongtiger/oauth-rfc6749 v0.0.0-20200425080127-84ea54f497e5 h1:nY7DcjEC+aq4Ul7soiVJoi21p4+8z+u8G3Jj/8vIXzE=
+github.com/thongtiger/oauth-rfc6749 v0.0.0-20200425080127-84ea54f497e5/go.mod h1:GwRwPkqk1RsrHNnsHJqUP8axSOOfJ1oPvgQMwA0V1W8=
 github.com/tidwall/pretty v1.0.0 h1:HsD+QiTn7sK6flMKIvNmpqz1qrpP3Ps6jOKIKMooyg4=
 github.com/tidwall/pretty v1.0.0/go.mod h1:XNkn88O1ChpSDQmQeStsy+sBenx6DDtFZJxhVysOjyk=
 github.com/valyala/bytebufferpool v1.0.0 h1:GqA5TC/0021Y/b9FG4Oi9Mr3q7XYx6KllzawFIhcdPw=

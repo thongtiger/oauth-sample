@@ -68,7 +68,8 @@ func main() {
 		}
 		return c.JSON(http.StatusUnauthorized, echo.Map{})
 	})
-	e.POST("/signup", func(c echo.Context) (err error) {
+	// for admin
+	e.POST("/newuser", func(c echo.Context) (err error) {
 		payload := struct {
 			Username string   `json:"username" validate:"required"`
 			Password string   `json:"password" validate:"required"`
@@ -76,16 +77,16 @@ func main() {
 			Scope    []string `json:"scope"`
 		}{}
 		if err = c.Bind(&payload); err != nil {
-			return c.JSON(http.StatusUnsupportedMediaType,echo.Map{"message":"invalid format"})
+			return c.JSON(http.StatusUnsupportedMediaType, echo.Map{"message": "invalid format"})
 		}
 		if err = c.Validate(payload); err != nil {
-			return c.JSON(http.StatusBadRequest,echo.Map{"message":"invalid parameter"})
+			return c.JSON(http.StatusBadRequest, echo.Map{"message": "invalid parameter"})
 		}
-		if !util.UsernameValid(payload.Username){
-			return c.JSON(http.StatusBadRequest,echo.Map{"message":"username is not correct format"})
+		if !util.UsernameValid(payload.Username) {
+			return c.JSON(http.StatusBadRequest, echo.Map{"message": "username is not correct format"})
 		}
-		if !util.PasswordValid(payload.Password){
-			return c.JSON(http.StatusBadRequest,echo.Map{"message":"password is not correct format"})
+		if !util.PasswordValid(payload.Password) {
+			return c.JSON(http.StatusBadRequest, echo.Map{"message": "password is not correct format"})
 		}
 		if user, _ := st.GetUser(payload.Username); user != nil {
 			return c.JSON(http.StatusBadRequest, echo.Map{"message": fmt.Sprintf("%s already exists", user.Username)})
@@ -96,7 +97,7 @@ func main() {
 		}
 		(*currentUser).Password = ""
 		return c.JSON(http.StatusCreated, echo.Map{"message": "successfully", "result": currentUser})
-	})
+	}, auth.AcceptedRole("ADMIN"))
 
 	e.GET("/logout", handle.LogoutHandle, auth.JWTMiddleware())
 	e.GET("/protected", func(c echo.Context) error { return c.String(http.StatusOK, "allow protected") }, auth.JWTMiddleware())
