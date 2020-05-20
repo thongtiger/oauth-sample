@@ -3,6 +3,8 @@ package store
 import (
 	"context"
 	"fmt"
+	"go.mongodb.org/mongo-driver/mongo/options"
+	"log"
 	"time"
 
 	"github.com/thongtiger/oauth-rfc6749/auth"
@@ -19,7 +21,7 @@ func (c *mongoContext) NewUser(username, password, role string, scope []string) 
 		return nil, err
 	}
 	insertData := auth.User{
-		ID: 			primitive.NewObjectID(),
+		ID:             primitive.NewObjectID(),
 		Role:           role,
 		Scope:          scope,
 		Username:       username,
@@ -78,5 +80,49 @@ func (c *mongoContext) GetUser(username string) (result *auth.User, err error) {
 	if err = collection.FindOne(ctx, filter).Decode(&result); err != nil {
 		return
 	}
+	return
+}
+
+func (c *mongoContext) FindUser() (results []*auth.User) {
+	client, err := c.newClient()
+	defer client.Disconnect(context.TODO())
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	collection := client.Database(c.database).Collection(CollectUsers)
+
+
+	findOptions := options.Find()
+	//findOptions.SetLimit(2)
+
+	// Here's an array in which you can store the decoded documents
+
+	// Passing bson.D{{}} as the filter matches all documents in the collection
+	cur, err := collection.Find(context.TODO(), bson.D{{}}, findOptions)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// Finding multiple documents returns a cursor
+	// Iterating through the cursor allows us to decode documents one at a time
+	for cur.Next(context.TODO()) {
+		// create a value into which the single document can be decoded
+		var elem auth.User
+		err := cur.Decode(&elem)
+		if err != nil {
+			log.Fatal(err)
+		}
+		results = append(results, &elem)
+	}
+
+	if err := cur.Err(); err != nil {
+		log.Fatal(err)
+	}
+
+	// Close the cursor once finished
+	cur.Close(context.TODO())
+
+	//fmt.Printf("Found multiple documents (array of pointers): %+v\n", results)
 	return
 }

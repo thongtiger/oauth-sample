@@ -10,7 +10,6 @@ import (
 	"github.com/labstack/echo/middleware"
 
 	"github.com/labstack/echo"
-	"github.com/thongtiger/gostack/util"
 	"github.com/thongtiger/oauth-rfc6749/handle"
 	"gopkg.in/go-playground/validator.v9"
 )
@@ -19,7 +18,7 @@ var validate *validator.Validate
 var conf Config
 var st store.Store
 
-// Validator type of validator
+// CustomValidator type of validator
 type CustomValidator struct{ validator *validator.Validate }
 
 // Validate is a context validator
@@ -62,42 +61,21 @@ func main() {
 			if ok, user := st.ValidateUser(oauth2.Username, oauth2.Password); ok {
 				// generate token
 				return handle.GenerateTK(c, user)
+			} else {
+				return c.JSON(http.StatusUnauthorized, echo.Map{"message": "Login failed"})
 			}
 		case "refresh_token":
 			return handle.RefreshTK(c, oauth2)
 		}
-		return c.JSON(http.StatusUnauthorized, echo.Map{})
+		return c.JSON(http.StatusUnauthorized, echo.Map{"message": fmt.Sprintf("unsupport granttype %s", oauth2.GrantType)})
 	})
-	// for admin
-	e.POST("/newuser", func(c echo.Context) (err error) {
-		payload := struct {
-			Username string   `json:"username" validate:"required"`
-			Password string   `json:"password" validate:"required"`
-			Role     string   `json:"role"`
-			Scope    []string `json:"scope"`
-		}{}
-		if err = c.Bind(&payload); err != nil {
-			return c.JSON(http.StatusUnsupportedMediaType, echo.Map{"message": "invalid format"})
-		}
-		if err = c.Validate(payload); err != nil {
-			return c.JSON(http.StatusBadRequest, echo.Map{"message": "invalid parameter"})
-		}
-		if !util.UsernameValid(payload.Username) {
-			return c.JSON(http.StatusBadRequest, echo.Map{"message": "username is not correct format"})
-		}
-		if !util.PasswordValid(payload.Password) {
-			return c.JSON(http.StatusBadRequest, echo.Map{"message": "password is not correct format"})
-		}
-		if user, _ := st.GetUser(payload.Username); user != nil {
-			return c.JSON(http.StatusBadRequest, echo.Map{"message": fmt.Sprintf("%s already exists", user.Username)})
-		}
-		currentUser, err := st.NewUser(payload.Username, payload.Password, payload.Role, payload.Scope)
-		if err != nil {
-			return
-		}
-		(*currentUser).Password = ""
-		return c.JSON(http.StatusCreated, echo.Map{"message": "successfully", "result": currentUser})
-	}, auth.AcceptedRole("ADMIN"))
+	gUser := e.Group("/user",auth.JWTMiddleware())
+	{
+		gUser.POST("", createUser, auth.AcceptedRole("ADMIN") )
+		gUser.GET("", findUser, auth.AcceptedRole("ADMIN"))
+		gUser.PUT("", updateUser, auth.AcceptedRole("ADMIN"))
+		gUser.DELETE("", deleteUser, auth.AcceptedRole("ADMIN"))
+	}
 
 	e.GET("/logout", handle.LogoutHandle, auth.JWTMiddleware())
 	e.GET("/protected", func(c echo.Context) error { return c.String(http.StatusOK, "allow protected") }, auth.JWTMiddleware())

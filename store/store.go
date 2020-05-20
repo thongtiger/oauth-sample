@@ -53,6 +53,7 @@ type Store interface {
 	NewUser(username, password, role string, scope []string) (*auth.User, error)
 	ValidateUser(username, password string) (bool, auth.User)
 	GetUser(username string) (result *auth.User, err error)
+	FindUser() (results []*auth.User)
 }
 
 // NewMongoStore : context
