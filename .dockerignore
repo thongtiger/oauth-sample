@@ -1,0 +1,9 @@
+**/node_modules
+**/dist
+.env
+.vscode
+.idea
+docker-compose.yml
+readme.md
+Dockerfile
+__pycache__

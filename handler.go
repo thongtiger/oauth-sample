@@ -29,13 +29,13 @@ func createUser(c echo.Context) (err error) {
 		return c.JSON(http.StatusBadRequest, echo.Map{"message": "password is not correct format"})
 	}
 	if user, _ := st.GetUser(payload.Username); user != nil {
-		return c.JSON(http.StatusBadRequest, echo.Map{"message": fmt.Sprintf("%s already exists", user.Username)})
+		return c.JSON(http.StatusBadRequest, echo.Map{"message": fmt.Sprintf("%s already exists", payload.Username)})
 	}
 	currentUser, err := st.NewUser(payload.Username, payload.Password, payload.Role, payload.Scope)
 	if err != nil {
 		return
 	}
-	(*currentUser).Password = ""
+	// (*currentUser).Password = ""
 	return c.JSON(http.StatusCreated, echo.Map{"message": "successfully", "result": currentUser})
 }
 

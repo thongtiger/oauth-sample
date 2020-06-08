@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/local/store"
 	"github.com/thongtiger/oauth-rfc6749/auth"
+	"github.com/thongtiger/oauth-sample/store"
 
 	"github.com/labstack/echo/middleware"
 
@@ -28,7 +28,8 @@ func (cv *CustomValidator) Validate(i interface{}) error {
 
 func init() {
 	conf.Read()
-	st = store.NewMongoStore(conf.Mongodb.Host, conf.Mongodb.Port, conf.Mongodb.Username, conf.Mongodb.Password, conf.Mongodb.Database)
+	st = store.NewMYSQLStore(conf.Mysql.Host, conf.Mysql.Port, conf.Mysql.Username, conf.Mysql.Password, conf.Mysql.Database)
+	// st = store.NewMongoStore(conf.Mongodb.Host, conf.Mongodb.Port, conf.Mongodb.Username, conf.Mongodb.Password, conf.Mongodb.Database)
 }
 func main() {
 	e := echo.New()
@@ -69,9 +70,9 @@ func main() {
 		}
 		return c.JSON(http.StatusUnauthorized, echo.Map{"message": fmt.Sprintf("unsupport granttype %s", oauth2.GrantType)})
 	})
-	gUser := e.Group("/user",auth.JWTMiddleware())
+	gUser := e.Group("/user", auth.JWTMiddleware())
 	{
-		gUser.POST("", createUser, auth.AcceptedRole("ADMIN") )
+		gUser.POST("", createUser, auth.AcceptedRole("ADMIN"))
 		gUser.GET("", findUser, auth.AcceptedRole("ADMIN"))
 		gUser.PUT("", updateUser, auth.AcceptedRole("ADMIN"))
 		gUser.DELETE("", deleteUser, auth.AcceptedRole("ADMIN"))

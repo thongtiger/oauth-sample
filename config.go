@@ -32,6 +32,13 @@ type Config struct {
 		Password string
 		Port     int
 	}
+	Mysql struct {
+		Host     string
+		Database string
+		Username string
+		Password string
+		Port     string
+	}
 	Redisdb struct {
 		Addr     string
 		Password string
@@ -75,6 +82,19 @@ func (c *Config) Read() {
 	}
 	if val, ok := os.LookupEnv("MONGO_PASSWORD"); ok {
 		c.Mongodb.Password = strings.TrimSpace(val)
+	}
+	// mysql
+	if val, ok := os.LookupEnv("MYSQL_HOST"); ok {
+		c.Mysql.Host = strings.TrimSpace(val)
+	}
+	if val, ok := os.LookupEnv("MYSQL_DB"); ok {
+		c.Mysql.Database = strings.TrimSpace(val)
+	}
+	if val, ok := os.LookupEnv("MYSQL_USERNAME"); ok {
+		c.Mysql.Username = strings.TrimSpace(val)
+	}
+	if val, ok := os.LookupEnv("MYSQL_PASSWORD"); ok {
+		c.Mysql.Password = strings.TrimSpace(val)
 	}
 	return
 }
