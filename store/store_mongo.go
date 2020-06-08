@@ -3,9 +3,10 @@ package store
 import (
 	"context"
 	"fmt"
-	"go.mongodb.org/mongo-driver/mongo/options"
 	"log"
 	"time"
+
+	"go.mongodb.org/mongo-driver/mongo/options"
 
 	"github.com/thongtiger/oauth-rfc6749/auth"
 	"go.mongodb.org/mongo-driver/bson"
@@ -91,7 +92,6 @@ func (c *mongoContext) FindUser() (results []*auth.User) {
 		return
 	}
 	collection := client.Database(c.database).Collection(CollectUsers)
-
 
 	findOptions := options.Find()
 	//findOptions.SetLimit(2)

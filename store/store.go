@@ -97,4 +97,3 @@ func (c *mongoContext) newClient() (*mongo.Client, error) {
 	fmt.Println("Connected to MongoDB!")
 	return client, nil
 }
-
